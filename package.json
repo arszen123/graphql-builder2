@@ -1,0 +1,23 @@
+{
+  "name": "graphql-orm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasmine-ts --config=jasmine.json",
+    "jasmine": "jasmine",
+    "tsc": "tsc",
+    "build": "echo \"No build config jet.\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tslint": "^6.1.3",
+    "typescript": "^4.0.2",
+    "jasmine": "^3.5.0",
+    "@types/jasmine": "^3.5.4",
+    "ts-node": "^8.6.2",
+    "jasmine-ts": "^0.3.0",
+    "jasmine-spec-reporter": "^4.2.1"
+  }
+}
