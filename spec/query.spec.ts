@@ -25,3 +25,58 @@ describe('GraphQLQuery', function () {
 }`)
     })
 });
+
+
+describe('When graphql query created from Entity class with Entity Field (nested object)', function () {
+    @Entity()
+    class Address {
+        @Field()
+        public country;
+        @Field()
+        public street;
+        @Field()
+        public zipCode;
+    }
+    @Entity()
+    class Human {
+        @Field({
+            type: Address
+        })
+        public address;
+    }
+
+    it('MUST return the valid graphql query, with nested query', function () {
+        const queryString = GraphQLBuilder.create(Human).getQuery().getQuery()
+        expect(queryString).toBe(`Human {
+  address {
+    country
+    street
+    zipCode
+  }
+}`)
+    });
+});
+
+describe('When graphql query created from Entity class and Fields with arguments', function () {
+    @Entity()
+    class Human {
+        @Field({
+            arguments: {
+                type: {
+                    required: true,
+                    default: 'full'
+                }
+            }
+        })
+        public name;
+        @Field()
+        public age;
+    }
+    it('the generated query MUST contain the required arguments', function () {
+        const queryString = GraphQLBuilder.create(Human).getQuery().getQuery();
+        expect(queryString).toBe(`Human {
+  name(type: "full")
+  age
+}`);
+    })
+});

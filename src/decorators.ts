@@ -26,7 +26,9 @@ export function Field(prop?: IField) {
         defineMetadataIfNotExists(target.constructor);
         const obj = target.constructor as unknown as IEntity;
         const name = prop?.name || propertyKey;
-        obj._metadata.addField(name, new FieldMetadata(name, prop?.arguments || {}));
+        const type = prop?.type;
+        assertFieldType(type);
+        obj._metadata.addField(name, new FieldMetadata(name, prop?.arguments || {}, type as IEntity));
     }
 }
 
@@ -38,5 +40,15 @@ function defineMetadataIfNotExists(target: object) {
             value: new ClassMetadata(className),
             writable: false,
         });
+    }
+}
+
+/**
+ * Check whether type is a valid Entity class or not.
+ * @param type
+ */
+function assertFieldType(type: any) {
+    if (typeof type !== 'undefined' && !('_metadata' in type && type._metadata instanceof ClassMetadata)) {
+        throw new Error(`Field '${name}' is not a GraphQL entity.`);
     }
 }
