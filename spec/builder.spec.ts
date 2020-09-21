@@ -27,3 +27,29 @@ describe('GraphQLBuilder', function () {
         expect(query).toBeInstanceOf(GraphQLQuery);
     })
 });
+
+
+describe('GraphQLBuilder with selected fields', function () {
+    const fields = ['name', 'age'];
+
+    @Entity()
+    class Human {
+        @Field()
+        public name;
+        @Field()
+        public age;
+        @Field()
+        public address;
+    }
+    it('when getSelect called it must return the previously selected fields', function () {
+        const qb = GraphQLBuilder.create(Human).select(fields);
+        expect(qb.getSelect()).toEqual(fields);
+    });
+    it('when getSelect called it must return the previously selected fields', function () {
+        const qb = GraphQLBuilder.create(Human);
+        for (const field of fields) {
+            qb.select(field);
+        }
+        expect(qb.getSelect()).toEqual(fields);
+    });
+});

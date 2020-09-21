@@ -10,6 +10,7 @@ describe('GraphQLQuery', function () {
         @Field()
         public age;
     }
+
     it('MUST return a valid graphql query', function () {
         const query = GraphQLBuilder.create(Human).getQuery();
         const queryString = query.getQuery();
@@ -37,6 +38,7 @@ describe('When graphql query created from Entity class with Entity Field (nested
         @Field()
         public zipCode;
     }
+
     @Entity()
     class Human {
         @Field({
@@ -58,7 +60,11 @@ describe('When graphql query created from Entity class with Entity Field (nested
 });
 
 describe('When graphql query created from Entity class and Fields with arguments', function () {
-    @Entity()
+    @Entity({
+        arguments: {
+            id: {default: 1, required: false}
+        }
+    })
     class Human {
         @Field({
             arguments: {
@@ -72,10 +78,33 @@ describe('When graphql query created from Entity class and Fields with arguments
         @Field()
         public age;
     }
-    it('the generated query MUST contain the required arguments', function () {
+
+    it('the generated query MUST contain the arguments with default value', function () {
         const queryString = GraphQLBuilder.create(Human).getQuery().getQuery();
-        expect(queryString).toBe(`Human {
+        expect(queryString).toBe(`Human (id: 1) {
   name(type: "full")
+  age
+}`);
+    })
+});
+
+
+describe('GraphQLBuilder with selected fields', function () {
+    @Entity()
+    class Human {
+        @Field()
+        public name;
+        @Field()
+        public age;
+        @Field()
+        public address;
+    }
+
+    const fields = ['name', 'age'];
+    const qb = GraphQLBuilder.create(Human).select(fields);
+    it('the produced graphql query must contain only the selected fields', function () {
+        expect(qb.getQuery().getQuery()).toBe(`Human {
+  name
   age
 }`);
     })

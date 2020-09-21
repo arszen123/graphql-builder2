@@ -3,6 +3,7 @@ import {ClassMetadata} from "./metadata-classes/class-metadata";
 import {FieldMetadata} from "./metadata-classes/field-metadata";
 import {IArgument} from "./interfaces";
 import {wrapPrimitiveType} from "./types";
+import {transformSelect} from "./helper";
 
 export class GraphQLQuery {
     public static executor = (query: string) => new Promise((res, rej) => res({}));
@@ -15,12 +16,16 @@ export class GraphQLQuery {
     }
 
     protected _build() {
-        this.query = this._buildQuery(this.metadata);
+        let selectedFields: any = transformSelect(this.builder.getSelect());
+        if (Object.keys(selectedFields).length === 0) {
+            selectedFields = undefined;
+        }
+        this.query = this._buildQuery(this.metadata, selectedFields);
     }
 
-    protected _buildQuery(metadata: ClassMetadata, name?: string): string {
+    protected _buildQuery(metadata: ClassMetadata, selectedFields?: { [key: string]: any }, name?: string): string {
         const className = name || metadata.getName();
-        const fieldsArray = this._buildFields(metadata.getFields());
+        const fieldsArray = this._buildFields(metadata.getFields(), selectedFields);
         const lineBreak = '\n';
         const fields = fieldsArray.map(v => GraphQLQuery.indention + v).join(lineBreak);
         let argumentList = this._buildArguments(metadata.getArguments());
@@ -30,21 +35,37 @@ export class GraphQLQuery {
         return `${className} ${argumentList}{${lineBreak}${fields}${lineBreak}}`;
     }
 
-    protected _buildFields(properties: {[key:string]: FieldMetadata}): string[] {
+    protected _buildFields(properties: { [key: string]: FieldMetadata }, selectedFields?: { [key: string]: any }): string[] {
         const res: string[] = [];
-        for (const propertiesKey in properties) {
-            if (properties.hasOwnProperty(propertiesKey)) {
-                const prop = properties[propertiesKey];
-                if (prop.isEntity()) {
-                    const nestedEntity = this._buildQuery(prop.type._metadata, prop.name);
-                    for (const line of nestedEntity.split('\n')) {
-                        res.push(line);
-                    }
-                    continue;
-                }
-                const argumentList = this._buildArguments(prop.getArguments());
-                res.push(prop.name + argumentList);
+        // Skip ts "Object is possibly 'undefined'" error.
+        const getSelectedFieldFn = (fieldName): 1 | { [key: string]: any } | undefined => {
+            if (typeof selectedFields !== 'undefined') {
+                return selectedFields[fieldName];
             }
+            return 1;
+        };
+        for (const propertiesKey in properties) {
+            if (!properties.hasOwnProperty(propertiesKey)) {
+                continue;
+            }
+            const prop = properties[propertiesKey];
+            const selectedField = getSelectedFieldFn(prop.name);
+            if (typeof selectedField === 'undefined') {
+                continue;
+            }
+            if (prop.isEntity()) {
+                let nestedEntitySelectedFields;
+                if (selectedField !== 1) {
+                    nestedEntitySelectedFields = selectedFields;
+                }
+                const nestedEntity = this._buildQuery(prop.type._metadata, nestedEntitySelectedFields, prop.name);
+                for (const line of nestedEntity.split('\n')) {
+                    res.push(line);
+                }
+                continue;
+            }
+            const argumentList = this._buildArguments(prop.getArguments());
+            res.push(prop.name + argumentList);
         }
         return res
     }

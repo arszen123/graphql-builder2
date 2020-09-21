@@ -9,8 +9,8 @@
     "tsc": "tsc",
     "build": "echo \"No build config jet.\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Ali Arsen",
+  "license": "MIT",
   "devDependencies": {
     "tslint": "^6.1.3",
     "typescript": "^4.0.2",

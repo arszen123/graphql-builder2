@@ -26,17 +26,60 @@ class Human {
 
 ### GraphQLBuilder
 
-Example:
+Example 1:
 ```typescript
+import {Entity, Field} from "./src/decorators";
+import {GraphQLBuilder} from "./src/builder"
+
+@Entity()
+class Human {
+    @Field()
+    public name;
+}
+
 GraphQLBuilder.create(Human) // returns: GraphQLBuilder
     .getQuery() // returns: GraphQLQuery
     .getQuery(true); // returns (GraphQL query string): string 
 ```
-Output:
+Output 1:
 ```graphql schema
 query {
   Human {
     name
+  }
+}
+```
+
+- - -
+
+Example 2:
+```typescript
+import {Entity, Field} from "./src/decorators";
+import {GraphQLBuilder} from "./src/builder"
+
+@Entity()
+class Human {
+    @Field()
+    public name;
+    @Field()
+    public age;
+    @Field()
+    public country;
+}
+
+GraphQLBuilder.create(Human)
+    .select('name')
+    .select('age')
+    //.select(['name', 'age']) // short
+    .getQuery()
+    .getQuery(true); 
+```
+Output 1:
+```graphql schema
+query {
+  Human {
+    name
+    age
   }
 }
 ```

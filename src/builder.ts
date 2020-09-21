@@ -4,6 +4,8 @@ import {GraphQLQuery} from "./query";
 
 export class GraphQLBuilder {
 
+    protected _select: string[] = [];
+
     protected constructor(public readonly entity: IEntity) {
     }
 
@@ -16,5 +18,27 @@ export class GraphQLBuilder {
 
     public getQuery() {
         return new GraphQLQuery(this);
+    }
+
+    public select(fields: string | string[]) {
+        if (typeof fields === 'string') {
+            fields = [fields];
+        }
+        this._select.push(...fields);
+        this._select = this._select.filter((value, index, arr) => arr.indexOf(value) === index);
+        return this;
+    }
+
+    public getSelect(): string[] {
+        const res: string[] = [];
+        for (const item of this._select) {
+            res.push(item);
+        }
+        return res;
+    }
+
+    public clearSelect() {
+        this._select = [];
+        return this;
     }
 }
