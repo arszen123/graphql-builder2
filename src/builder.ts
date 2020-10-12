@@ -1,10 +1,14 @@
 import {ClassMetadata} from "./metadata-classes/class-metadata";
 import {IEntity} from "./interfaces";
 import {GraphQLQuery} from "./query";
+import {IArgumentType} from "./types";
+
+declare type ArgumentType = string | number | boolean | IArgumentType<any>;
 
 export class GraphQLBuilder {
 
     protected _select: string[] = [];
+    protected _arguments: {[key: string]: ArgumentType} = {};
 
     protected constructor(public readonly entity: IEntity) {
     }
@@ -39,6 +43,35 @@ export class GraphQLBuilder {
 
     public clearSelect() {
         this._select = [];
+        return this;
+    }
+
+    public setArgument(key: string, value: ArgumentType) {
+        this._arguments[key] = value;
+        return this;
+    }
+
+    public setArguments(value: {[key: string]: ArgumentType}) {
+        for (const key in value) {
+            if (value.hasOwnProperty(key)) {
+                this._arguments[key] = value[key];
+            }
+        }
+        return this;
+    }
+
+    public getArguments(): {[key: string]: ArgumentType} {
+        const res: {[key: string]: ArgumentType} = {};
+        for (const key in this._arguments) {
+            if (this._arguments.hasOwnProperty(key)) {
+                res[key] = this._arguments[key];
+            }
+        }
+        return res;
+    }
+
+    public clearArgument() {
+        this._arguments = {};
         return this;
     }
 }

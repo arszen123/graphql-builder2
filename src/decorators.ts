@@ -1,11 +1,11 @@
-import {IEntity, IArgument, IField} from "./interfaces";
+import {IEntity, IEntityArgument, IField} from "./interfaces";
 import {ClassMetadata} from "./metadata-classes/class-metadata";
 import {FieldMetadata} from "./metadata-classes/field-metadata";
 
 export function Entity(prop?: {
     name?: string // default: class name
     arguments?: {
-        [key: string]: IArgument
+        [key: string]: IEntityArgument
     }
 }) {
     return function (

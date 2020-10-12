@@ -24,3 +24,11 @@ export interface IArgument {
     required: boolean;
     default?: string | number;
 }
+
+export interface IEntityArgument extends IArgument{
+    /**
+     * Alias to refer to an entity argument.
+     * Use when an entity argument name conflicts with a field name.
+     */
+    alias?: string;
+}

@@ -83,3 +83,10 @@ query {
   }
 }
 ```
+
+### TODO
+
+1. Refactor test cases
+2. Specify types (Type safety)
+3. Create build script
+4. Add support for class extension
