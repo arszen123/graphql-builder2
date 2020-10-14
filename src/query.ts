@@ -5,14 +5,15 @@ import {IArgument, IEntity, IEntityArgument} from "./interfaces";
 import {wrapPrimitiveType} from "./types";
 import {nestObject} from "./helper";
 
-export class GraphQLQuery {
+export class GraphQLQuery<T> {
     public static executor = (query: string) => new Promise<any>((res, rej) => res({}));
     public static indention = '  ';
     private query;
     protected metadata: ClassMetadata;
-    private entity: IEntity;
-    public constructor(protected readonly builder: GraphQLBuilder) {
-        this.metadata = this.builder.entity._metadata;
+    private readonly entity: T|IEntity;
+
+    public constructor(protected readonly builder: GraphQLBuilder<T>) {
+        this.metadata = (this.builder.entity as IEntity)._metadata;
         this.entity = this.builder.entity;
         this._build();
     }
@@ -111,7 +112,7 @@ export class GraphQLQuery {
         return res;
     }
 
-    public async execute(callback?: (query: string) => Promise<any>): Promise<any> {
+    public async execute(callback?: (query: string) => Promise<any>): Promise<T> {
         let cb = GraphQLQuery.executor;
         if (typeof callback !== 'undefined') {
             cb = callback;
@@ -120,7 +121,7 @@ export class GraphQLQuery {
         const data = await cb(this.getQuery());
         const entityClass = (this.entity as unknown as new (...args:any[]) => any);
         const entity = new entityClass();
-        return this._fillEntity(entity, this.metadata, data);
+        return (this._fillEntity(entity, this.metadata, data) as T);
     }
 
     /**

@@ -210,7 +210,7 @@ describe('GraphQLQuery.execute', function () {
         @Field()
         public age;
         @Field({type: Dog})
-        public dogs?: Dog[];
+        public dogs: Dog[] = [];
     }
 
     const dogData = {
@@ -226,11 +226,10 @@ describe('GraphQLQuery.execute', function () {
 
     describe('with simple entity', function () {
         it('MUST return an entity instance', async function () {
-            const result = await GraphQLBuilder.create(Dog)
+            const dog = await GraphQLBuilder.create(Dog)
                 .getQuery()
                 .execute(query => new Promise<any>((resolve, reject) => resolve(dogData)));
-            expect(result).toBeInstanceOf(Dog);
-            const dog = (result as Dog);
+            expect(dog).toBeInstanceOf(Dog);
             expect(dog.name).toBeDefined();
             expect(dog.name).toEqual(dogData.name);
             expect(dog.bark()).toEqual(dogData.name + ': BARK!');
@@ -239,13 +238,12 @@ describe('GraphQLQuery.execute', function () {
 
     describe('with nested array entity', function () {
         it('must return an entity instance, with the nested array entity', async function () {
-            const result = await GraphQLBuilder.create(Human)
+            const human = await GraphQLBuilder.create(Human)
                 .getQuery()
                 .execute(query => new Promise<any>((resolve, reject) => resolve(humanData)));
-            expect(result).toBeInstanceOf(Human);
-            const human = (result as Human);
+            expect(human).toBeInstanceOf(Human);
             expect(human.dogs).toBeDefined();
-            const dogs = (human.dogs as Dog[])
+            const dogs = human.dogs;
             expect(dogs.length).toBe(1);
             const dog = dogs[0];
             expect(dog).toBeDefined();

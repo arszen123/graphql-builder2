@@ -5,23 +5,23 @@ import {IArgumentType} from "./types";
 
 declare type ArgumentType = string | number | boolean | IArgumentType<any>;
 
-export class GraphQLBuilder {
+export class GraphQLBuilder<T> {
 
     protected _select: string[] = [];
-    protected _arguments: {[key: string]: ArgumentType} = {};
+    protected _arguments: { [key: string]: ArgumentType } = {};
 
-    protected constructor(public readonly entity: IEntity) {
+    protected constructor(public readonly entity: T | IEntity) {
     }
 
-    public static create(entity: object) {
+    public static create<T>(entity: new (...args: any[]) => T) {
         if (!('_metadata' in entity && (entity as { _metadata: any })._metadata instanceof ClassMetadata)) {
             throw new Error('Class is not a GraphQL entity.');
         }
-        return new GraphQLBuilder(entity as IEntity);
+        return new GraphQLBuilder<T>(entity as IEntity);
     }
 
     public getQuery() {
-        return new GraphQLQuery(this);
+        return new GraphQLQuery<T>(this);
     }
 
     public select(fields: string | string[]) {
@@ -51,7 +51,7 @@ export class GraphQLBuilder {
         return this;
     }
 
-    public setArguments(value: {[key: string]: ArgumentType}) {
+    public setArguments(value: { [key: string]: ArgumentType }) {
         for (const key in value) {
             if (value.hasOwnProperty(key)) {
                 this._arguments[key] = value[key];
@@ -60,8 +60,8 @@ export class GraphQLBuilder {
         return this;
     }
 
-    public getArguments(): {[key: string]: ArgumentType} {
-        const res: {[key: string]: ArgumentType} = {};
+    public getArguments(): { [key: string]: ArgumentType } {
+        const res: { [key: string]: ArgumentType } = {};
         for (const key in this._arguments) {
             if (this._arguments.hasOwnProperty(key)) {
                 res[key] = this._arguments[key];
