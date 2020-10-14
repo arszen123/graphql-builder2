@@ -1,13 +1,16 @@
 {
-  "name": "graphql-orm",
+  "name": "graphql-orm-ts",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib",
+  "types": "lib/*.d.ts",
   "scripts": {
     "test": "jasmine-ts --config=jasmine.json",
     "jasmine": "jasmine",
     "tsc": "tsc",
-    "build": "echo \"No build config jet.\" && exit 1"
+    "build": "tsc",
+    "prepare": "npm build",
+    "prepublishOnly": "npm run test"
   },
   "author": "Ali Arsen",
   "license": "MIT",
