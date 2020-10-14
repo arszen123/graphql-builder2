@@ -143,7 +143,7 @@ describe('When graphql query created from Entity class and Fields with arguments
     })
 });
 
-describe('Entity param name conflicts with a field in a query', function () {
+describe('Entity argument with alias', function () {
     @Entity({
         arguments: {
             id: {
@@ -175,7 +175,7 @@ describe('Entity param name conflicts with a field in a query', function () {
         public age;
     }
 
-    it('it MUST work well...', function () {
+    it('must set the aliased argument value', function () {
         const queryString = GraphQLBuilder.create(Human)
             .setArgument('entityId', 10)
             .setArgument('id.type', 'foreign')
@@ -224,28 +224,32 @@ describe('GraphQLQuery.execute', function () {
         dogs: [dogData],
     };
 
-    it('it MUST work well...', async function () {
-        const result = await GraphQLBuilder.create(Dog)
-            .getQuery()
-            .execute(query => new Promise<any>((resolve, reject) => resolve(dogData)));
-        expect(result).toBeInstanceOf(Dog);
-        const dog = (result as Dog);
-        expect(dog.name).toBeDefined();
-        expect(dog.name).toEqual(dogData.name);
-        expect(dog.bark()).toEqual(dogData.name + ': BARK!');
-    })
+    describe('with simple entity', function () {
+        it('MUST return an entity instance', async function () {
+            const result = await GraphQLBuilder.create(Dog)
+                .getQuery()
+                .execute(query => new Promise<any>((resolve, reject) => resolve(dogData)));
+            expect(result).toBeInstanceOf(Dog);
+            const dog = (result as Dog);
+            expect(dog.name).toBeDefined();
+            expect(dog.name).toEqual(dogData.name);
+            expect(dog.bark()).toEqual(dogData.name + ': BARK!');
+        });
+    });
 
-    it('it MUST work well too...', async function () {
-        const result = await GraphQLBuilder.create(Human)
-            .getQuery()
-            .execute(query => new Promise<any>((resolve, reject) => resolve(humanData)));
-        expect(result).toBeInstanceOf(Human);
-        const human = (result as Human);
-        expect(human.dogs).toBeDefined();
-        const dogs = (human.dogs as Dog[])
-        expect(dogs.length).toBe(1);
-        const dog = dogs[0];
-        expect(dog).toBeDefined();
-        expect(dog.name).toBe(humanData.dogs[0].name);
-    })
+    describe('with nested array entity', function () {
+        it('must return an entity instance, with the nested array entity', async function () {
+            const result = await GraphQLBuilder.create(Human)
+                .getQuery()
+                .execute(query => new Promise<any>((resolve, reject) => resolve(humanData)));
+            expect(result).toBeInstanceOf(Human);
+            const human = (result as Human);
+            expect(human.dogs).toBeDefined();
+            const dogs = (human.dogs as Dog[])
+            expect(dogs.length).toBe(1);
+            const dog = dogs[0];
+            expect(dog).toBeDefined();
+            expect(dog.name).toBe(humanData.dogs[0].name);
+        })
+    });
 });

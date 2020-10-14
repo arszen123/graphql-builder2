@@ -82,8 +82,12 @@ export class GraphQLQuery {
             }
             const arg = argumentList[argName];
             const argValue = argsValue[(arg as IEntityArgument).alias || argName] || arg.default;
-            if (arg.required && typeof argValue === 'undefined') {
+            const isUndefinedValue = typeof argValue === 'undefined';
+            if (arg.required && isUndefinedValue) {
                 throw new Error(`Argument '${argName}' is required, but the value is not provided!`);
+            }
+            if (isUndefinedValue) {
+                continue;
             }
             const queryArgValue = this._createArgumentValue(argValue);
             res.push(`${argName}: ${queryArgValue}`);

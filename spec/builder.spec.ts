@@ -4,61 +4,10 @@ import {GraphQLBuilder} from "../src/builder";
 import {GraphQLQuery} from "../src/query";
 
 describe('GraphQLBuilder', function () {
-    @Entity()
-    class Human {
-        @Field()
-        private name;
-        @Field()
-        private birthDate;
-    }
-
-    class NotEntityHuman {
-        private name;
-        private birthDate;
-    }
-
-    it('create function accepts class with \'_metadata\' only', function () {
-        expect(() => GraphQLBuilder.create(Human)).toBeTruthy();
-        expect(() => GraphQLBuilder.create(NotEntityHuman)).toThrowError('Class is not a GraphQL entity.')
-    });
-    it('getQuery must return a GraphQLQuery instance', function () {
-        const query = GraphQLBuilder.create(Human).getQuery();
-        expect(query).toBeDefined();
-        expect(query).toBeInstanceOf(GraphQLQuery);
-    })
-});
-
-
-describe('GraphQLBuilder with selected fields', function () {
-    const fields = ['name', 'age'];
-
-    @Entity()
-    class Human {
-        @Field()
-        public name;
-        @Field()
-        public age;
-        @Field()
-        public address;
-    }
-    it('when getSelect called it must return the previously selected fields', function () {
-        const qb = GraphQLBuilder.create(Human).select(fields);
-        expect(qb.getSelect()).toEqual(fields);
-    });
-    it('when getSelect called it must return the previously selected fields', function () {
-        const qb = GraphQLBuilder.create(Human);
-        for (const field of fields) {
-            qb.select(field);
-        }
-        expect(qb.getSelect()).toEqual(fields);
-    });
-});
-
-describe('GraphQLBuilder', function () {
     @Entity({
         arguments: {
             id: {
-                required: true,
+                required: false,
             }
         }
     })
@@ -70,12 +19,48 @@ describe('GraphQLBuilder', function () {
         @Field({
             arguments: {
                 type: {
-                    required: true
+                    required: true,
+                    default: 'full',
                 }
             }
         })
         public address;
     }
+
+    class NotEntityHuman {
+        private name;
+        private birthDate;
+    }
+
+    it('create function accepts @Entity decorated classes only', function () {
+        expect(() => GraphQLBuilder.create(Human)).toBeTruthy();
+        expect(() => GraphQLBuilder.create(NotEntityHuman)).toThrowError('Class is not a GraphQL entity.')
+    });
+    it('getQuery must return a GraphQLQuery instance', function () {
+        const query = GraphQLBuilder.create(Human).getQuery();
+        expect(query).toBeDefined();
+        expect(query).toBeInstanceOf(GraphQLQuery);
+    });
+
+    describe('select', function () {
+        const fields = ['name', 'age'];
+        describe('with array of values', function () {
+            const qb = GraphQLBuilder.create(Human).select(fields);
+            it('when getSelect called it must return the array of selected fields', function () {
+                expect(qb.getSelect()).toEqual(fields);
+            });
+        });
+        describe('with single string values', function () {
+            const qb = GraphQLBuilder.create(Human);
+            for (const field of fields) {
+                qb.select(field);
+            }
+            it('when getSelect called it must return the array of selected fields', function () {
+                expect(qb.getSelect()).toEqual(fields);
+            });
+        });
+    });
+
     describe('setArgument', function () {
         it('MUST set the argument', function () {
             const qb = GraphQLBuilder.create(Human)
@@ -88,7 +73,7 @@ describe('GraphQLBuilder', function () {
         });
     });
     describe('setArguments', function () {
-        const args =  {
+        const args = {
             'id': 10,
             'address.type': 'full'
         };
@@ -99,7 +84,7 @@ describe('GraphQLBuilder', function () {
         });
     });
     describe('clearArguments', function () {
-        const args =  {
+        const args = {
             'id': 10,
             'address.type': 'full'
         };
